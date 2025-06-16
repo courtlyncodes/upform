@@ -2,6 +2,8 @@ package com.upform.controller;
 
 import com.upform.model.ExerciseLog;
 import com.upform.model.WorkoutSession;
+import com.upform.repository.WorkoutSessionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -13,8 +15,11 @@ import java.util.Map;
 //@RequestMapping("/workout")
 public class WorkoutSessionController {
 
-    private final Map<Long, WorkoutSession> workoutMap = new HashMap<>();
-    private long nextWorkoutId = 1 ;
+    @Autowired
+    private WorkoutSessionRepository workoutSessionRepository;
+
+
+    //    private long nextWorkoutId = 1 ;
 
     @PostMapping("/workouts")
     public WorkoutSession startWorkout(@RequestBody WorkoutSession session) {
