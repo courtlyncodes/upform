@@ -1,11 +1,23 @@
 package com.upform.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "exercise_log")
 public class ExerciseLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String exerciseName;
     private int sets;
     private int reps;
     private double weight;
+    private int exertion;
+
+    @ManyToOne()
+    @JoinColumn(name = "workout_session_id")
+    private WorkoutSession workoutSession;
 
     public ExerciseLog() {}
 
@@ -18,12 +30,16 @@ public class ExerciseLog {
             int sets,
             int reps,
             double weight,
-            int exertion
+            int exertion,
+            WorkoutSession workoutSession
     ) {
+        this.id = id;
         this.exerciseName = exerciseName;
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+        this.exertion = exertion;
+        this.workoutSession = workoutSession;
     }
 
     // Getters and setters
@@ -41,4 +57,24 @@ public class ExerciseLog {
 
     public double getWeight() { return weight; }
     public void setWeight(double weight) { this.weight = weight; }
+
+    public int getExertion() { return exertion; }
+    public void setExertion(int exertion) { this.exertion = exertion; }
+
+    public WorkoutSession getWorkoutSession() { return workoutSession; }
+    public void setWorkoutSession(WorkoutSession workoutSession) { this.workoutSession = workoutSession; }
+
+    @Override
+    public String toString() {
+        return "ExerciseLog{" +
+                "id=" + id +
+                ", exerciseName='" + exerciseName + '\'' +
+                ", sets=" + sets +
+                ", reps=" + reps +
+                ", weight=" + weight +
+                ", exertion=" + exertion +
+                ", workoutSessionId=" + (workoutSession != null ? workoutSession.getId() : null) +
+                '}';
+    }
+
 }

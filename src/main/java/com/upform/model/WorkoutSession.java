@@ -1,34 +1,50 @@
 package com.upform.model;
 
-import org.springframework.cglib.core.Local;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "workout_sessions")
 public class WorkoutSession {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     private LocalDate date;
-    private List<ExerciseLog> exercises;
+
     private String difficulty; // easy, moderate, hard
     private int durationInMinutes;
     private String notes;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "workoutSession", cascade = CascadeType.ALL)
+    private List<ExerciseLog> exercises = new ArrayList<>();
 
     public WorkoutSession() {}
 
     public WorkoutSession(
             long id,
             LocalDate date,
-            List<ExerciseLog> exercises,
             String difficulty,
             int durationInMinutes,
-            String notes
+            String notes,
+            User user,
+            List<ExerciseLog> exercises
     ) {
         this.id = id;
         this.date = date;
-        this.exercises = exercises;
         this.difficulty = difficulty;
         this.durationInMinutes = durationInMinutes;
         this.notes = notes;
+        this.user = user;
+        this.exercises = exercises;
     }
 
     // Getters and Setters
@@ -39,9 +55,6 @@ public class WorkoutSession {
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
 
-    public List getExercises() { return exercises; }
-    public void setExercises(List<ExerciseLog> exercises) { this.exercises = exercises; }
-
     public String getDifficulty() { return difficulty; }
     public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
 
@@ -50,4 +63,10 @@ public class WorkoutSession {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public List<ExerciseLog> getExercises() { return exercises; }
+    public void setExercises(List<ExerciseLog> exercises) { this.exercises = exercises; }
 }
