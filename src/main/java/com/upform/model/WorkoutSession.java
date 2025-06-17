@@ -12,12 +12,12 @@ public class WorkoutSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private LocalDate date;
 
     private String difficulty; // easy, moderate, hard
-    private int durationInMinutes;
+    private Integer durationInMinutes;
     private String notes;
 
     @ManyToOne
@@ -30,10 +30,10 @@ public class WorkoutSession {
     public WorkoutSession() {}
 
     public WorkoutSession(
-            long id,
+            Long id,
             LocalDate date,
             String difficulty,
-            int durationInMinutes,
+            Integer durationInMinutes,
             String notes,
             User user,
             List<ExerciseLog> exercises
@@ -49,8 +49,8 @@ public class WorkoutSession {
 
     // Getters and Setters
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
@@ -58,8 +58,8 @@ public class WorkoutSession {
     public String getDifficulty() { return difficulty; }
     public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
 
-    public int getDurationInMinutes() { return durationInMinutes; }
-    public void setDurationInMinutes(int durationInMinutes) { this.durationInMinutes = durationInMinutes; }
+    public Integer getDurationInMinutes() { return durationInMinutes; }
+    public void setDurationInMinutes(Integer durationInMinutes) { this.durationInMinutes = durationInMinutes; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

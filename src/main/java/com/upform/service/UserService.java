@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -30,6 +29,7 @@ public class UserService {
     }
 
     //Get all users
+    // Will lock with Auth
     public List<User> getAllUsers() {
         logger.info("Fetching all users.");
         return userRepository.findAll();
