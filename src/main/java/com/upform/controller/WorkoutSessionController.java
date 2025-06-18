@@ -20,29 +20,29 @@ public class WorkoutSessionController {
 
 
     //    private long nextWorkoutId = 1 ;
+//
+//    @PostMapping("/workouts")
+//    public WorkoutSession startWorkout(@RequestBody WorkoutSession session) {
+//        session.setId(nextWorkoutId++);
+//        session.setExercises(new ArrayList<>());
+//        workoutMap.put(session.getId(), session);
+//        return session;
+//    }
 
-    @PostMapping("/workouts")
-    public WorkoutSession startWorkout(@RequestBody WorkoutSession session) {
-        session.setId(nextWorkoutId++);
-        session.setExercises(new ArrayList<>());
-        workoutMap.put(session.getId(), session);
-        return session;
-    }
-
-    @PostMapping("/workouts/{workoutId}/exercises")
-    public String logExercise(@PathVariable Long workoutId, @RequestBody ExerciseLog exercise) {
-        WorkoutSession session = workoutMap.get(workoutId);
-        if (session == null) {
-            return "Workout session not found.";
-        }
-        session.getExercises().add(exercise);
-        return "Exercise added to workout.";
-    }
-
-    @GetMapping("workouts/{workoutId}")
-    public WorkoutSession getWorkoutSession(@PathVariable Long workoutId) {
-        return workoutMap.get(workoutId);
-    }
+//    @PostMapping("/workouts/{workoutId}/exercises")
+//    public String logExercise(@PathVariable Long workoutId, @RequestBody ExerciseLog exercise) {
+//        WorkoutSession session = workoutMap.get(workoutId);
+//        if (session == null) {
+//            return "Workout session not found.";
+//        }
+//        session.getExercises().add(exercise);
+//        return "Exercise added to workout.";
+//    }
+//
+//    @GetMapping("workouts/{workoutId}")
+//    public WorkoutSession getWorkoutSession(@PathVariable Long workoutId) {
+//        return workoutMap.get(workoutId);
+//    }
 
 
 //    private final List<ExerciseLog> logs = new ArrayList<>();

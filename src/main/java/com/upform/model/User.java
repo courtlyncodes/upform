@@ -16,6 +16,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<WorkoutSession> workoutSessionList = new ArrayList<>();
+
     private String authId;
     private String name;
     private String email;

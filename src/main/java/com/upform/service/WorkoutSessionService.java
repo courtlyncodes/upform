@@ -17,8 +17,8 @@ public class WorkoutSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkoutSessionService.class);
 
-    private WorkoutSessionRepository workoutSessionRepository;
-    private UserRepository userRepository;
+    private final WorkoutSessionRepository workoutSessionRepository;
+    private final UserRepository userRepository;
 
     // Constructor injection
     public WorkoutSessionService(WorkoutSessionRepository workoutSessionRepository, UserRepository userRepository) {
@@ -29,7 +29,7 @@ public class WorkoutSessionService {
     // Get all workout sessions
     // TODO: Lock this endpoint behind admin privileges before going to prod
     public List<WorkoutSession> getAllWorkoutSessions() {
-        logger.info("Fetching all workout sessions.");
+        logger.info("Fetching all workout sessions");
         return workoutSessionRepository.findAll();
     }
 
@@ -56,6 +56,10 @@ public class WorkoutSessionService {
     public WorkoutSession createWorkoutSession(WorkoutSession session, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (session.getDurationInMinutes() != null && session.getDurationInMinutes() < 0) {
+            throw new IllegalArgumentException("Duration cannot be negative");
+        }
 
         session.setUser(user);
         return workoutSessionRepository.save(session);

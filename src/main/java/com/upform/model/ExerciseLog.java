@@ -9,11 +9,12 @@ public class ExerciseLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String exerciseName;
-    private int sets;
-    private int reps;
-    private double weight;
-    private int exertion;
+    private Integer sets;
+    private Integer reps;
+    private Double weight;
+    private Integer exertion;
 
     @ManyToOne()
     @JoinColumn(name = "workout_session_id")
@@ -27,10 +28,10 @@ public class ExerciseLog {
     public ExerciseLog(
             Long id,
             String exerciseName,
-            int sets,
-            int reps,
-            double weight,
-            int exertion,
+            Integer sets,
+            Integer reps,
+            Double weight,
+            Integer exertion,
             WorkoutSession workoutSession
     ) {
         this.id = id;
@@ -49,17 +50,17 @@ public class ExerciseLog {
     public String getExerciseName() { return exerciseName; }
     public void setExerciseName(String exerciseName) { this.exerciseName = exerciseName; }
 
-    public int getSets() { return sets; }
-    public void setSets(int sets) { this.sets = sets; }
+    public Integer getSets() { return sets; }
+    public void setSets(Integer sets) { this.sets = sets; }
 
-    public int getReps() { return reps; }
-    public void setReps(int reps) { this.reps = reps; }
+    public Integer getReps() { return reps; }
+    public void setReps(Integer reps) { this.reps = reps; }
 
-    public double getWeight() { return weight; }
-    public void setWeight(double weight) { this.weight = weight; }
+    public Double getWeight() { return weight; }
+    public void setWeight(Double weight) { this.weight = weight; }
 
-    public int getExertion() { return exertion; }
-    public void setExertion(int exertion) { this.exertion = exertion; }
+    public Integer getExertion() { return exertion; }
+    public void setExertion(Integer exertion) { this.exertion = exertion; }
 
     public WorkoutSession getWorkoutSession() { return workoutSession; }
     public void setWorkoutSession(WorkoutSession workoutSession) { this.workoutSession = workoutSession; }
