@@ -1,6 +1,6 @@
 package com.upform.service;
 
-import com.upform.dto.ExerciseLogDTO;
+import com.upform.dto.ExerciseLogDto;
 import com.upform.exception.WorkoutSessionNotFoundException;
 import com.upform.model.ExerciseLog;
 import com.upform.model.WorkoutSession;
@@ -32,7 +32,10 @@ public class ExerciseLogService {
     // TODO: Lock this endpoint behind admin privileges before going to prod
     public List<ExerciseLog> getAllExerciseLogs() {
         logger.info("Fetching all exercise logs");
-        return exerciseLogRepository.findAll();
+
+        List<ExerciseLog> allExerciseLogs =  exerciseLogRepository.findAll();
+        logger.info("Retrieved all {} exercise logs", allExerciseLogs.size());
+        return allExerciseLogs;
     }
 
     // Get all exercise logs by workout session by user
@@ -41,7 +44,9 @@ public class ExerciseLogService {
         WorkoutSession session = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
 
-        return session.getExercises();
+        List<ExerciseLog> allExerciseLogs = session.getExercises();
+        logger.info("Retrieved all {} exercise logs for session: {}, user: {}", allExerciseLogs.size(), session.getId(), session.getUser());
+        return allExerciseLogs;
     }
 
     // Get one exercise log by workout session by user
@@ -56,27 +61,52 @@ public class ExerciseLogService {
         }
 
         ExerciseLog existingExerciseLog = existingSession.getExercises().get(exerciseLogIndex);
+        logger.info("Retrieved single exercise log at index {} for sessionId: {}, userId: {}", exerciseLogIndex, sessionId, userId);
         return existingExerciseLog;
     }
 
     // Create exercise log by workout session by user
-    public ExerciseLog createExerciseLogBySessionAndUser(ExerciseLogDTO dto, Long sessionId, Long userId) {
+    public ExerciseLog createExerciseLogBySessionAndUser(ExerciseLogDto dto, Long sessionId, Long userId) {
         logger.info("Creating exercise log for sessionId: {}, userId: {}", sessionId, userId);
         WorkoutSession existingSession = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
 
-        ExerciseLog exerciseLog = mapDtoToExerciseLogCreate(dto, existingSession);
+        ExerciseLog exerciseLog = new ExerciseLog();
+
+        exerciseLog.setWorkoutSession(existingSession);
+        mapExerciseLogDtoToEntity(dto, exerciseLog);
 
         ExerciseLog savedLog = exerciseLogRepository.save(exerciseLog);
         logger.info("Created exercise log with ID: {}", savedLog.getId());
         return savedLog;
     }
 
-    private static ExerciseLog mapDtoToExerciseLogCreate(ExerciseLogDTO dto, WorkoutSession existingSession) {
-        ExerciseLog exerciseLog = new ExerciseLog();
+    // Update exercise log by workout session by user
+    public ExerciseLog updateExerciseLogBySessionAndUser(ExerciseLogDto dto, int exerciseLogIndex, Long sessionId, Long userId) {
+        logger.info("Updating exercise log for sessionId: {}, userId: {}", sessionId, userId);
+        WorkoutSession existingSession = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
+                .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
+
+        if (exerciseLogIndex < 0 || exerciseLogIndex >= existingSession.getExercises().size()) {
+            logger.warn("Invalid exercise log index for update: {}", exerciseLogIndex);
+            throw new IndexOutOfBoundsException("Invalid exercise log index");
+        }
+
+        ExerciseLog existingExerciseLog = existingSession.getExercises().get(exerciseLogIndex);
+
+        mapExerciseLogDtoToEntity(dto, existingExerciseLog);
+
+        ExerciseLog savedLog = exerciseLogRepository.save(existingExerciseLog);
+        logger.info("Updated exercise log with ID: {}", savedLog.getId());
+        return savedLog;
+    }
+
+    private void mapExerciseLogDtoToEntity(ExerciseLogDto dto, ExerciseLog exerciseLog) {
+        if (dto == null) {
+            throw new IllegalArgumentException("ExerciseLogDto cannot be null");
+        }
 
         exerciseLog.setExerciseName(dto.getExerciseName());
-        exerciseLog.setWorkoutSession(existingSession);
 
         if (dto.getSets() != null) {
             exerciseLog.setSets(dto.getSets());
@@ -93,51 +123,8 @@ public class ExerciseLogService {
         if (dto.getExertion() != null) {
             exerciseLog.setExertion(dto.getExertion());
         }
-        return exerciseLog;
-    }
 
-    // Update exercise log by workout session by user
-    public ExerciseLog updateExerciseLogBySessionAndUser(ExerciseLogDTO dto, int exerciseLogIndex, Long sessionId, Long userId) {
-        logger.info("Updating exercise log for sessionId: {}, userId: {}", sessionId, userId);
-        WorkoutSession existingSession = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
-                .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
-
-
-        if (exerciseLogIndex < 0 || exerciseLogIndex >= existingSession.getExercises().size()) {
-            logger.warn("Invalid exercise log index for update: {}", exerciseLogIndex);
-            throw new IndexOutOfBoundsException("Invalid exercise log index");
-        }
-
-        ExerciseLog existingExerciseLog = mapDtoToExerciseLogUpdate(dto, exerciseLogIndex, existingSession);
-
-        ExerciseLog savedLog = exerciseLogRepository.save(existingExerciseLog);
-        logger.info("Updated exercise log with ID: {}", savedLog.getId());
-        return savedLog;
-    }
-
-    private static ExerciseLog mapDtoToExerciseLogUpdate(ExerciseLogDTO dto, int exerciseLogIndex, WorkoutSession existingSession) {
-        ExerciseLog existingExerciseLog = existingSession.getExercises().get(exerciseLogIndex);
-
-        if (dto.getExerciseName() != null) {
-            existingExerciseLog.setExerciseName(dto.getExerciseName());
-        }
-
-        if (dto.getSets() != null) {
-            existingExerciseLog.setSets(dto.getSets());
-        }
-
-        if (dto.getReps() != null) {
-            existingExerciseLog.setReps(dto.getReps());
-        }
-
-        if (dto.getWeight() != null) {
-            existingExerciseLog.setWeight(dto.getWeight());
-        }
-
-        if (dto.getExertion() != null) {
-            existingExerciseLog.setExertion(dto.getExertion());
-        }
-        return existingExerciseLog;
+        logger.debug("Applied DTO to ExerciseLog entity: {}", exerciseLog);
     }
 
     // Delete one workout log by workout session by user
