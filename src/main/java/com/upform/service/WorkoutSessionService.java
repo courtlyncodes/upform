@@ -1,5 +1,6 @@
 package com.upform.service;
 
+import com.upform.dto.ExerciseLogDto;
 import com.upform.dto.WorkoutSessionDto;
 import com.upform.exception.UserNotFoundException;
 import com.upform.exception.WorkoutSessionNotFoundException;
@@ -30,43 +31,54 @@ public class WorkoutSessionService {
 
     // Get all workout sessions
     // TODO: Lock this endpoint behind admin privileges before going to prod
-    public List<WorkoutSession> getAllWorkoutSessions() {
+    public List<WorkoutSessionDto> getAllWorkoutSessions() {
         logger.info("Fetching all workout sessions");
 
         List<WorkoutSession> allWorkoutSessions = workoutSessionRepository.findAll();
-        logger.info("Retrieved all workout sessions");
-        return allWorkoutSessions;
+
+        List<WorkoutSessionDto> dtoList = allWorkoutSessions.stream()
+                        .map(this::convertToDto)
+                        .toList();
+
+        logger.info("Retrieved {} workout sessions", dtoList.size());
+        return dtoList;
     }
 
     // Get one workout session by id
     // TODO: Lock this endpoint behind admin privileges before going to prod
-    public WorkoutSession getWorkoutSessionById(Long id) {
+    public WorkoutSessionDto getWorkoutSessionById(Long id) {
         logger.info("Fetching workout session with id {}", id);
 
         WorkoutSession existingWorkoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(id));
 
-        logger.info("Retrieved single workout session for session {}", existingWorkoutSession.getId());
-        return existingWorkoutSession;
+        WorkoutSessionDto retrievedWorkoutSession = convertToDto(existingWorkoutSession);
+        logger.info("Retrieved single workout session for session {}", retrievedWorkoutSession.getId());
+        return retrievedWorkoutSession;
     }
 
     // Get all workout sessions by user
-    public List<WorkoutSession> getAllWorkoutSessionsByUserId(Long userId) {
+    public List<WorkoutSessionDto> getAllWorkoutSessionsByUserId(Long userId) {
         logger.info("Fetching all workout sessions for userId: {}", userId);
         List<WorkoutSession> existingWorkoutSessions = workoutSessionRepository.findAllByUserId(userId);
 
-        logger.info("Retrieved all {} workout sessions for userId: {}", existingWorkoutSessions.size(), userId);
-        return existingWorkoutSessions;
+        List<WorkoutSessionDto> dtoList = existingWorkoutSessions.stream()
+                        .map(this::convertToDto)
+                        .toList();
+
+        logger.info("Retrieved all {} workout sessions for userId: {}", dtoList.size(), userId);
+        return dtoList;
     }
 
     // Get one session by user
-    public WorkoutSession getWorkoutSessionByIdAndUserId(Long sessionId, Long userId) {
+    public WorkoutSessionDto getWorkoutSessionByIdAndUserId(Long sessionId, Long userId) {
         logger.info("Fetching workout session for sessionId: {}, userId: {}", sessionId, userId);
         WorkoutSession existingWorkoutSession = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
 
-        logger.info("Retrieved workout session for sessionId: {}, user: {}", existingWorkoutSession.getId(), existingWorkoutSession.getUser());
-        return existingWorkoutSession;
+        WorkoutSessionDto retrievedWorkoutSession = convertToDto(existingWorkoutSession);
+        logger.info("Retrieved workout session for sessionId: {}, user: {}", retrievedWorkoutSession.getId(), userId);
+        return retrievedWorkoutSession;
     }
 
     // Create a workout session
@@ -97,43 +109,6 @@ public class WorkoutSessionService {
         return workoutSessionRepository.save(existingSession);
     }
 
-    private void mapWorkoutSessionDtoToEntity(WorkoutSessionDto dto, WorkoutSession workoutSession) {
-        if (dto == null) {
-            throw new IllegalArgumentException("WorkoutSessionDto cannot be null");
-        }
-
-        if (dto.getDate() != null) {
-            workoutSession.setDate(dto.getDate());
-        }
-
-        if (dto.getDifficulty() != null) {
-            workoutSession.setDifficulty(dto.getDifficulty());
-        }
-
-        if (dto.getDurationInMinutes() != null) {
-            workoutSession.setDurationInMinutes(dto.getDurationInMinutes());
-        }
-
-        if (dto.getNotes() != null) {
-            workoutSession.setNotes(dto.getNotes());
-        }
-
-        if (dto.getExercises() != null && !dto.getExercises().isEmpty()) {
-            List<ExerciseLog> exerciseLogs = dto.getExercises().stream().map(exerciseDto -> {
-                ExerciseLog log = new ExerciseLog();
-                log.setExerciseName(exerciseDto.getExerciseName());
-                log.setSets(exerciseDto.getSets());
-                log.setReps(exerciseDto.getReps());
-                log.setWeight(exerciseDto.getWeight());
-                log.setWorkoutSession(workoutSession); // important for the FK relationship
-                return log;
-            }).toList();
-
-            workoutSession.setExercises(exerciseLogs);
-        }
-
-        logger.debug("Mapped WorkoutSessionDto to WorkoutSession entity for userId={}", workoutSession.getUser().getId());
-    }
     // Delete all workout sessions
     // TODO: Lock this endpoint behind admin privileges before going to prod, add deleted flag instead for sessions
     public void deleteAllWorkoutSessions() {
@@ -162,5 +137,83 @@ public class WorkoutSessionService {
 
         workoutSessionRepository.delete(session);
         logger.info("Successfully deleted workout session with sessionId: {}, userId: {}", session.getId(), session.getUser());
+    }
+
+    private WorkoutSessionDto convertToDto(WorkoutSession session) {
+        WorkoutSessionDto dto = new WorkoutSessionDto();
+
+        if (session == null) {
+            throw new IllegalArgumentException("WorkoutSession cannot be null");
+        }
+
+        if (session.getDate() != null) {
+            dto.setDate(session.getDate());
+        }
+
+        if (session.getDifficulty() != null) {
+            dto.setDifficulty(session.getDifficulty());
+        }
+
+        if (session.getDurationInMinutes() != null) {
+            dto.setDurationInMinutes(session.getDurationInMinutes());
+        }
+
+        if (session.getNotes() != null) {
+            dto.setNotes(session.getNotes());
+        }
+
+        if (session.getExercises() != null && !session.getExercises().isEmpty()) {
+            List<ExerciseLogDto> exerciseLogDtos = session.getExercises().stream().map(log-> {
+                ExerciseLogDto logDto = new ExerciseLogDto();
+                logDto.setExerciseName(log.getExerciseName());
+                logDto.setSets(log.getSets());
+                logDto.setReps(log.getReps());
+                logDto.setWeight(log.getWeight());
+                logDto.setExertion(log.getExertion());
+                return logDto;
+            }).toList();
+
+            dto.setExercises(exerciseLogDtos);
+        }
+        return dto;
+    }
+
+    private void mapWorkoutSessionDtoToEntity(WorkoutSessionDto dto, WorkoutSession workoutSession) {
+        if (dto == null) {
+            throw new IllegalArgumentException("WorkoutSessionDto cannot be null");
+        }
+
+        if (dto.getDate() != null) {
+            workoutSession.setDate(dto.getDate());
+        }
+
+        if (dto.getDifficulty() != null) {
+            workoutSession.setDifficulty(dto.getDifficulty());
+        }
+
+        if (dto.getDurationInMinutes() != null) {
+            workoutSession.setDurationInMinutes(dto.getDurationInMinutes());
+        }
+
+        if (dto.getNotes() != null) {
+            workoutSession.setNotes(dto.getNotes());
+        }
+
+        if (dto.getExercises() != null && !dto.getExercises().isEmpty()) {
+            List<ExerciseLog> exerciseLogs = dto.getExercises().stream().map(exerciseDto -> {
+                ExerciseLog log = new ExerciseLog();
+                log.setExerciseName(exerciseDto.getExerciseName());
+                log.setSets(exerciseDto.getSets());
+                log.setReps(exerciseDto.getReps());
+                log.setWeight(exerciseDto.getWeight());
+                log.setExertion(exerciseDto.getExertion());
+                log.setWorkoutSession(workoutSession); // important for the FK relationship
+                return log;
+            }).toList();
+
+            workoutSession.setExercises(exerciseLogs);
+        }
+
+        logger.debug("Mapped WorkoutSessionDto to WorkoutSession entity for userId={}", workoutSession.getUser().getId());
     }
 }

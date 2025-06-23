@@ -1,58 +1,47 @@
-package com.upform.model;
+package com.upform.dto;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.upform.model.WorkoutSession;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table( name= "users")
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserDto {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long id;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<WorkoutSession> workoutSessionList = new ArrayList<>();
-
-    private String authId;
     private String name;
     private String email;
     private String experienceLevel;
     private String goal;
     private LocalDate joinedDate;
 
-    private User() {}
+    private List<@Valid WorkoutSession> workoutSessionList = new ArrayList<>();
 
-    public User (
-        Long id,
-        List<WorkoutSession> workoutSessionList,
-        String authId,
-        String name,
-        String email,
-        String experienceLevel,
-        String goal,
-        LocalDate joinedDate
+    private UserDto() {}
+
+    public UserDto (
+            Long id,
+            String name,
+            String email,
+            String experienceLevel,
+            String goal,
+            LocalDate joinedDate,
+            List<WorkoutSession> workoutSessionList
     ) {
         this.id = id;
-        this.workoutSessionList = workoutSessionList;
-        this.authId = authId;
         this.name = name;
         this.email = email;
         this.experienceLevel = experienceLevel;
         this.goal = goal;
         this.joinedDate = joinedDate;
+        this.workoutSessionList = workoutSessionList;
     }
 
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public List<WorkoutSession> getWorkoutSessionList() { return workoutSessionList; }
-    public void setWorkoutSessionList(List<WorkoutSession> workoutSessionList) { this.workoutSessionList = workoutSessionList; }
-
-    public String getAuthId() { return authId; }
-    public void setAuthId(String authId) { this.authId = authId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -68,4 +57,7 @@ public class User {
 
     public LocalDate getJoinedDate() { return joinedDate; }
     public void setJoinedDate(LocalDate joinedDate) { this.joinedDate = joinedDate; }
+
+    public List<WorkoutSession> getWorkoutSessionList() { return workoutSessionList; }
+    public void setWorkoutSessionList(List<WorkoutSession> workoutSessionList) { this.workoutSessionList = workoutSessionList; }
 }

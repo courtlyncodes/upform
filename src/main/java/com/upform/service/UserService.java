@@ -31,7 +31,7 @@ public class UserService {
     //Get all users
     // Will lock with Auth
     public List<User> getAllUsers() {
-        logger.info("Fetching all users.");
+        logger.info("Fetching all users");
         return userRepository.findAll();
     }
 }
