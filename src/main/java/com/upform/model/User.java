@@ -23,7 +23,7 @@ public class User {
     private String goal;
     private LocalDate joinedDate;
 
-    private User() {}
+    public User() {}
 
     public User (
         Long id,

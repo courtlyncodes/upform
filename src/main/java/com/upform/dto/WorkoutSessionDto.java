@@ -1,24 +1,28 @@
 package com.upform.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WorkoutSessionDto {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     private Long id;
 
     private LocalDate date;
-
     private String difficulty; // easy, moderate, hard
 
     @Min(1)
     private Integer durationInMinutes;
 
+    @Size(max = 1000, message = "Notes must be under 1000 characters")
     private String notes;
 
     private List<@Valid ExerciseLogDto> exercises = new ArrayList<>();

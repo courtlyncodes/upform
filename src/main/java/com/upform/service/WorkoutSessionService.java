@@ -12,6 +12,7 @@ import com.upform.repository.WorkoutSessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class WorkoutSessionService {
                         .map(this::convertToDto)
                         .toList();
 
-        logger.info("Retrieved {} workout sessions", dtoList.size());
+        logger.info("Retrieved {} workout sessions", allWorkoutSessions.size());
         return dtoList;
     }
 
@@ -52,9 +53,8 @@ public class WorkoutSessionService {
         WorkoutSession existingWorkoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(id));
 
-        WorkoutSessionDto retrievedWorkoutSession = convertToDto(existingWorkoutSession);
-        logger.info("Retrieved single workout session for session {}", retrievedWorkoutSession.getId());
-        return retrievedWorkoutSession;
+        logger.info("Retrieved single workout session for session {}", existingWorkoutSession.getId());
+        return convertToDto(existingWorkoutSession);
     }
 
     // Get all workout sessions by user
@@ -66,7 +66,7 @@ public class WorkoutSessionService {
                         .map(this::convertToDto)
                         .toList();
 
-        logger.info("Retrieved all {} workout sessions for userId: {}", dtoList.size(), userId);
+        logger.info("Retrieved all {} workout sessions for userId: {}", existingWorkoutSessions.size(), userId);
         return dtoList;
     }
 
@@ -76,13 +76,12 @@ public class WorkoutSessionService {
         WorkoutSession existingWorkoutSession = workoutSessionRepository.findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
 
-        WorkoutSessionDto retrievedWorkoutSession = convertToDto(existingWorkoutSession);
-        logger.info("Retrieved workout session for sessionId: {}, user: {}", retrievedWorkoutSession.getId(), userId);
-        return retrievedWorkoutSession;
+        logger.info("Retrieved workout session for sessionId: {}, user: {}", existingWorkoutSession.getId(), userId);
+        return convertToDto(existingWorkoutSession);
     }
 
     // Create a workout session
-    public WorkoutSession createWorkoutSession(WorkoutSessionDto dto, Long userId) {
+    public WorkoutSessionDto createWorkoutSession(WorkoutSessionDto dto, Long userId) {
         logger.info("Creating workout session for userId: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -95,18 +94,20 @@ public class WorkoutSessionService {
 
         WorkoutSession newWorkoutSession = workoutSessionRepository.save(workoutSession);
         logger.info("Created new workout session with ID: {}", newWorkoutSession.getId());
-        return newWorkoutSession;
+        return convertToDto(newWorkoutSession);
     }
 
     // Update a workout session
-    public WorkoutSession updateWorkoutSession(WorkoutSessionDto dto, Long sessionId, Long userId) {
+    public WorkoutSessionDto updateWorkoutSession(WorkoutSessionDto dto, Long sessionId, Long userId) {
         WorkoutSession existingSession = workoutSessionRepository
                 .findByIdAndUserId(sessionId, userId)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException(sessionId));
 
         mapWorkoutSessionDtoToEntity(dto, existingSession);
 
-        return workoutSessionRepository.save(existingSession);
+        WorkoutSession updatedSession = workoutSessionRepository.save(existingSession);
+        logger.info("Updated workout session with ID: {}", updatedSession.getId());
+        return convertToDto(updatedSession);
     }
 
     // Delete all workout sessions
@@ -140,11 +141,13 @@ public class WorkoutSessionService {
     }
 
     private WorkoutSessionDto convertToDto(WorkoutSession session) {
-        WorkoutSessionDto dto = new WorkoutSessionDto();
-
         if (session == null) {
             throw new IllegalArgumentException("WorkoutSession cannot be null");
         }
+
+        WorkoutSessionDto dto = new WorkoutSessionDto();
+
+        dto.setId(session.getId());
 
         if (session.getDate() != null) {
             dto.setDate(session.getDate());
@@ -162,7 +165,7 @@ public class WorkoutSessionService {
             dto.setNotes(session.getNotes());
         }
 
-        if (session.getExercises() != null && !session.getExercises().isEmpty()) {
+        if (!CollectionUtils.isEmpty(session.getExercises())) {
             List<ExerciseLogDto> exerciseLogDtos = session.getExercises().stream().map(log-> {
                 ExerciseLogDto logDto = new ExerciseLogDto();
                 logDto.setExerciseName(log.getExerciseName());
@@ -175,6 +178,7 @@ public class WorkoutSessionService {
 
             dto.setExercises(exerciseLogDtos);
         }
+        logger.debug("Converted WorkoutSession with ID: {} to DTO", session.getId());
         return dto;
     }
 
@@ -199,7 +203,7 @@ public class WorkoutSessionService {
             workoutSession.setNotes(dto.getNotes());
         }
 
-        if (dto.getExercises() != null && !dto.getExercises().isEmpty()) {
+        if (!CollectionUtils.isEmpty(dto.getExercises())) {
             List<ExerciseLog> exerciseLogs = dto.getExercises().stream().map(exerciseDto -> {
                 ExerciseLog log = new ExerciseLog();
                 log.setExerciseName(exerciseDto.getExerciseName());
@@ -213,7 +217,6 @@ public class WorkoutSessionService {
 
             workoutSession.setExercises(exerciseLogs);
         }
-
         logger.debug("Mapped WorkoutSessionDto to WorkoutSession entity for userId={}", workoutSession.getUser().getId());
     }
 }

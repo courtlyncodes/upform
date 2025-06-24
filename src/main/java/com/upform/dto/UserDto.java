@@ -1,14 +1,16 @@
 package com.upform.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.upform.model.WorkoutSession;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
+    @JsonIgnore
     private Long id;
 
     private String name;
@@ -16,10 +18,9 @@ public class UserDto {
     private String experienceLevel;
     private String goal;
     private LocalDate joinedDate;
+    private List<@Valid WorkoutSessionDto> workoutSessionList = new ArrayList<>();
 
-    private List<@Valid WorkoutSession> workoutSessionList = new ArrayList<>();
-
-    private UserDto() {}
+    public UserDto() {}
 
     public UserDto (
             Long id,
@@ -28,7 +29,7 @@ public class UserDto {
             String experienceLevel,
             String goal,
             LocalDate joinedDate,
-            List<WorkoutSession> workoutSessionList
+            List<WorkoutSessionDto> workoutSessionList
     ) {
         this.id = id;
         this.name = name;
@@ -58,6 +59,6 @@ public class UserDto {
     public LocalDate getJoinedDate() { return joinedDate; }
     public void setJoinedDate(LocalDate joinedDate) { this.joinedDate = joinedDate; }
 
-    public List<WorkoutSession> getWorkoutSessionList() { return workoutSessionList; }
-    public void setWorkoutSessionList(List<WorkoutSession> workoutSessionList) { this.workoutSessionList = workoutSessionList; }
+    public List<WorkoutSessionDto> getWorkoutSessionList() { return workoutSessionList; }
+    public void setWorkoutSessionList(List<WorkoutSessionDto> workoutSessionList) { this.workoutSessionList = workoutSessionList; }
 }
