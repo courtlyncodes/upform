@@ -24,6 +24,10 @@ public class ExerciseLog {
     private Double weight;
     private Integer exertion;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @ManyToOne()
     @JoinColumn(name = "workout_session_id")
     private WorkoutSession workoutSession;

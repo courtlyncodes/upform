@@ -34,7 +34,6 @@ public class UserServiceUnitTests {
 
     private UserDto userDto;
 
-
     @BeforeEach
     public void setup() {
         user = User.builder()
